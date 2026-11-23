@@ -1,0 +1,10 @@
+{
+  "name": "fdm-design",
+  "description": "Installs the fdm-design skill: CAD-agnostic design rules for FDM/FFF printed parts and electronics enclosures (orientation, overhangs and bridges, walls, fits, heat-set inserts, load paths, connector openings from plug envelopes, cable corridors, shell joints), hard rules against six recurring failure modes, and four Python checks (geometric overhang audit, forced-support slice check, mesh check, interference check), each tested against fixtures that must fail.",
+  "version": "0.1.0",
+  "author": {
+    "name": "baizhiyuan"
+  },
+  "homepage": "https://github.com/baizhiyuan/fdm-design-skill",
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+.DS_Store
+*.zip
+.omc/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.pyc
