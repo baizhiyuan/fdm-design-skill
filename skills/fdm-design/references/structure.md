@@ -48,3 +48,11 @@ to the largest, slowest-to-print part fails this test.
 Pick buying dimensions first: thread and pitch, length under head, head and washer diameter,
 standoff length and thread type (M-F, F-F), insert SKU. Model pockets around those, not the
 other way round. Put them in the BOM with a purchasable source.
+
+Engagement targets depend on what carries the thread: a standard nut is rated at full
+height, so "screw passes through the whole nut and protrudes at least one pitch" is the
+criterion; tapped plastic or heat-set inserts need the engagement your insert or test data
+supports. Do not apply an insert rule (e.g. ≥ 3 mm) to a nut that is only 2 mm tall.
+A bed-face hex nut pocket (opened from below, ceiling bridged with a 0.2 mm sacrificial
+layer) keeps the bed face flat, leaves no threads in plastic and makes the nut replaceable;
+it is usually better than a standoff that forces a boss to protrude below the bed face.

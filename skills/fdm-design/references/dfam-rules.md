@@ -44,7 +44,12 @@ Rules:
 - Edges facing the bed get a 45° chamfer, not a fillet (a fillet's lowest band is a near-
   horizontal overhang) [`prusa-modeling`, `print3d-designer` S]. A 0.3–0.5 mm 45° chamfer on
   the bottom edge also hides elephant foot [`print3d-designer` S].
-- Rising portal roofs (openings in vertical walls): 45° gable or chamfer.
+- Rising portal roofs (openings in vertical walls): gable or chamfer.
+- **Never design a face exactly at the threshold.** Faces modelled at exactly 45° with a 45°
+  slicer threshold were supported by Bambu Studio 02.09.01.70 (rounding puts them on the wrong
+  side): side-wall vent slot roofs grew support columns from the bed to 25 mm. Keep a margin:
+  roofs and lead-ins ≤ 40° from vertical (35° recommended) with a flat apex ≤ 0.8 mm
+  [field observation, this skill's case study; check on your slicer].
 
 ## Bridges
 

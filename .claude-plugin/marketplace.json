@@ -8,7 +8,7 @@
       "name": "fdm-design",
       "source": "./",
       "description": "CAD-agnostic FDM design skill for printed parts and electronics enclosures: hard rules against six recurring failure modes (unverified 'no supports' claims, unrepairable load paths, receptacle-cut openings, unbuyable cable routes, mismatched shell joints, silent structural changes) plus overhang, forced-support slice, mesh and interference checks.",
-      "version": "0.1.1"
+      "version": "0.1.2"
     }
   ]
 }
