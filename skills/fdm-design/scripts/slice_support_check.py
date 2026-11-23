@@ -17,12 +17,12 @@ Orca `support_threshold_angle` is FROM HORIZONTAL, so the script writes
 
 Feature tags. Bambu Studio and OrcaSlicer write `; FEATURE: <name>`;
 PrusaSlicer writes `;TYPE:<name>`. Matching is case-insensitive substring:
-  support  : "support"   (e.g. "Support", "Support interface")    UNVERIFIED
-  overhang : "overhang"  (e.g. "Overhang wall")                    UNVERIFIED
-  bridge   : "bridge"    (e.g. "Bridge", "Internal Bridge")        "Bridge" seen
-                                                                   in real G-code
-The literal names were not confirmed against a current G-code file when this
-script was written. Every feature name found is printed, so check them once
+  support  : "support"   ("Support", "Support interface", "Support transition")
+  overhang : "overhang"  ("Overhang wall")
+  bridge   : "bridge"    ("Bridge", "Internal Bridge")
+Confirmed in real G-code from Bambu Studio 02.09.01.70 (A1, 0.20 Standard, supports on): Support, Support interface,
+Support transition, Overhang wall, Bridge. OrcaSlicer and PrusaSlicer names are
+not yet confirmed. Every feature name found is printed, so check them once
 against your slicer version and report differences upstream.
 
 Verdict and exit codes:
@@ -52,6 +52,15 @@ CATEGORIES = {"support": "support", "overhang": "overhang", "bridge": "bridge"}
 FEATURE_RE = re.compile(r"^;\s*(?:FEATURE:|TYPE:)\s*(.+?)\s*$")
 CONFIG_RE = re.compile(r"^;\s*([a-z_]+)\s*=\s*(.*?)\s*$")
 SLICER_NAMES = ("bambu-studio", "BambuStudio", "bambu_studio", "orca-slicer", "OrcaSlicer", "orcaslicer")
+# Default install locations (Windows, WSL view of Windows, macOS).
+SLICER_PATHS = (
+    r"C:\Program Files\Bambu Studio\bambu-studio.exe",  # validate: allow-install-path
+    "/mnt/c/Program Files/Bambu Studio/bambu-studio.exe",  # validate: allow-install-path
+    r"C:\Program Files\OrcaSlicer\orca-slicer.exe",  # validate: allow-install-path
+    "/mnt/c/Program Files/OrcaSlicer/orca-slicer.exe",  # validate: allow-install-path
+    "/Applications/BambuStudio.app/Contents/MacOS/BambuStudio",
+    "/Applications/OrcaSlicer.app/Contents/MacOS/OrcaSlicer",
+)
 
 
 def read_gcode(path: Path) -> str:
@@ -179,6 +188,9 @@ def find_slicer(explicit: str | None) -> str | None:
         hit = shutil.which(name)
         if hit:
             return hit
+    for path in SLICER_PATHS:
+        if Path(path).exists():
+            return path
     return None
 
 
@@ -245,7 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result, notes = verdict(parsed, args.max_overhang)
     report = {"source": str(source), "result": result, "notes": notes, **parsed,
-              "unverified_tags": ["support", "overhang"], "max_overhang_from_vertical": args.max_overhang}
+              "unverified_tags": [], "max_overhang_from_vertical": args.max_overhang}
     if args.json:
         print(json.dumps(report, indent=2))
     else:

@@ -107,7 +107,7 @@ All in `scripts/`, Python 3.10+, numpy required; trimesh and manifold3d optional
 | Script | What it proves | What it does not prove |
 |---|---|---|
 | `overhang_audit.py part.stl [--max-overhang 45 --max-bridge 10 --json]` | No downward face beyond the limit off the bed; ceilings classified as bridge (with span), cantilever or floating | Sag, curl or cooling quality; first-layer adhesion |
-| `slice_support_check.py --gcode plate.gcode` or `--model ... --machine/--process/--filament` | The slicer, with supports forced on at the threshold, generated zero support | That the support/overhang tag names match your slicer version (marked unverified) |
+| `slice_support_check.py --gcode plate.gcode` or `--model ... --machine/--process/--filament` | The slicer, with supports forced on at the threshold, generated zero support | That the tag names match slicers other than Bambu Studio (confirmed there; others unverified) |
 | `mesh_check.py part.stl --printer a1` | Watertight, consistent winding, outward normals, one body, fits the build volume | Wall thickness, printability |
 | `interference_check.py a.stl b.stl ... [--allow a.stl:b.stl]` | Pairwise solid intersection volume (exact with manifold3d; bounding boxes otherwise, reported as inconclusive) | Clearance margins, motion, assembly order |
 

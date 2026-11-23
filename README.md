@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757?style=for-the-badge&labelColor=F0EEE6" alt="Claude Code plugin">
-  <img src="https://img.shields.io/badge/version-0.1.0-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="version 0.1.0">
+  <img src="https://img.shields.io/badge/version-0.1.1-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="version 0.1.1">
   <img src="https://img.shields.io/badge/status-pre--release-B8860B?style=for-the-badge&labelColor=F0EEE6" alt="status: pre-release">
   <img src="https://img.shields.io/badge/license-MIT-788C5D?style=for-the-badge&labelColor=F0EEE6" alt="MIT license">
 </p>

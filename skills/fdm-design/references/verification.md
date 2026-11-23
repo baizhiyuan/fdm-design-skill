@@ -60,10 +60,10 @@ bambu-studio --slice 0 \
   [`print3d-designer` S].
 - No slicer on the machine? Slice in the GUI with supports enabled at the threshold, export
   G-code or a sliced 3MF, then: `python scripts/slice_support_check.py --gcode plate.gcode`.
-- Feature tags: Bambu/Orca write `; FEATURE: <name>`, PrusaSlicer `;TYPE:<name>`. "Bridge"
-  is confirmed in real Bambu-style G-code [`gcode-bridge-issue` S]; the literal "Support" and
-  "Overhang wall" strings are **unverified**: the script matches substrings and prints every
-  name it sees so you can check once.
+- Feature tags: Bambu/Orca write `; FEATURE: <name>`, PrusaSlicer `;TYPE:<name>`. "Support",
+  "Support interface", "Support transition", "Overhang wall" and "Bridge" are confirmed in
+  real G-code from Bambu Studio 02.09.01.70 (A1, 0.20 Standard, supports on); OrcaSlicer/PrusaSlicer names are not yet confirmed. The script
+  matches substrings and prints every name it sees so you can check once.
 - The script refuses to pass when `enable_support` is 0 or absent, the threshold does not
   match, or `support_on_build_plate_only` is on.
 - OrcaSlicer may have `--export-statistics` [U]. PrusaSlicer: `--support-material

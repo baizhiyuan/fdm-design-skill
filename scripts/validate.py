@@ -33,6 +33,8 @@ SHIPPED = {
 SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".pytest_cache", ".omc", "node_modules"}
 TEXT_SUFFIXES = {".md", ".py", ".json", ".yml", ".yaml", ".txt", ".toml", ".cfg", ".sh", ""}
 # Patterns are written so that this file does not match itself.
+ALLOW_MARKER = "# validate: allow-install-path"
+
 LOCAL_PATH_PATTERNS = [
     (re.compile(r"/h[o]me/[A-Za-z0-9_.-]+"), "home directory path"),
     (re.compile(r"/U[s]ers/[A-Za-z0-9_.-]+"), "macOS home path"),
@@ -164,6 +166,9 @@ def local_path_findings(root: Path = ROOT) -> list[str]:
         except UnicodeDecodeError:
             continue
         for n, line in enumerate(text.splitlines(), 1):
+            # Vendor default install locations may be listed when marked explicitly.
+            if line.rstrip().endswith(ALLOW_MARKER):
+                continue
             for pattern, what in LOCAL_PATH_PATTERNS:
                 if pattern.search(line):
                     found.append(f"{path.relative_to(root)}:{n}: {what}: {line.strip()[:80]}")

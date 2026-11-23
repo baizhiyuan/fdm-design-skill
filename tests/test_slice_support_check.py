@@ -2,7 +2,7 @@
 
 No slicer is needed: these tests feed synthetic G-code. The feature names
 used here mirror the documented formats; whether a given slicer version writes
-exactly these strings is listed as unverified in the script and the docs.
+exactly these strings is confirmed for Bambu Studio and unverified for other slicers.
 """
 from __future__ import annotations
 

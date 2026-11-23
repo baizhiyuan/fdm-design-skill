@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format is b
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-11-23
+
+### Changed
+
+- Confirmed the G-code feature names (Support, Support interface, Support transition,
+  Overhang wall, Bridge) against real sliced output from Bambu Studio 02.09.01.70
+  (A1, 0.20 Standard, supports on); the parser correctly failed two plates that need supports.
+- `slice_support_check.py` also looks in default install locations (Windows, WSL, macOS).
+- Hard rule 5 now requires reproducing every mounting point of kept reference parts, checked
+  with an overlaid hole map.
+
 ## [0.1.0] - 2026-11-23
 
 First version. Supersedes a 27-line single-file enclosure skill; its good parts are kept
@@ -26,8 +37,9 @@ result is CAD-verified, sliced or printed).
   (frontmatter, file set, links, versions, README parity, no absolute local paths); CI.
 
 ### Known gaps
-- Unverified: literal G-code names of support and overhang-wall features, HDMI overmould
+- Unverified: HDMI overmould
   sizes, SATA bend radius and stock lengths, conflicting M4 to M6 insert bores, material
   shrinkage. The slicer CLI path was not run against a real slicer.
 
+[0.1.1]: https://github.com/baizhiyuan/fdm-design-skill/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/baizhiyuan/fdm-design-skill/releases/tag/v0.1.0

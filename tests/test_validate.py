@@ -31,3 +31,11 @@ def test_negative_local_paths_are_flagged(tmp_path):
 def test_clean_text_is_not_flagged(tmp_path):
     (tmp_path / "ok.md").write_text("Install into ~/.claude/skills/fdm-design and run scripts/x.py\n")
     assert validate.local_path_findings(tmp_path) == []
+
+
+def test_install_path_marker_only_exempts_marked_lines(tmp_path):
+    f = tmp_path / "x.py"
+    f.write_text('A = "C:\\\\Program Files\\\\Tool\\\\tool.exe"  # validate: allow-install-path\n'
+                 'B = "C:\\\\Users\\\\someone\\\\file.txt"\n', encoding="utf-8")
+    found = validate.local_path_findings(tmp_path)
+    assert len(found) == 1 and ":2:" in found[0]
