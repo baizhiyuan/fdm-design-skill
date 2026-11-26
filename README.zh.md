@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757?style=for-the-badge&labelColor=F0EEE6" alt="Claude Code 插件">
-  <img src="https://img.shields.io/badge/version-0.1.2-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="版本 0.1.2">
+  <img src="https://img.shields.io/badge/version-0.2.0-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="版本 0.2.0">
   <img src="https://img.shields.io/badge/status-pre--release-B8860B?style=for-the-badge&labelColor=F0EEE6" alt="状态：预发布">
   <img src="https://img.shields.io/badge/license-MIT-788C5D?style=for-the-badge&labelColor=F0EEE6" alt="MIT 许可证">
 </p>
@@ -11,6 +11,7 @@
   <a href="#它做什么">它做什么</a> ·
   <a href="#六条硬性规则">硬性规则</a> ·
   <a href="#检查脚本">检查脚本</a> ·
+  <a href="#专职智能体">专职智能体</a> ·
   <a href="#安装">安装</a> ·
   <a href="#局限">局限</a> ·
   <a href="README.md">English</a>
@@ -30,6 +31,10 @@ build123d 都可以）。示例默认 Bambu Lab A1/X1、0.4 mm 喷嘴、PETG 或
 - 九份参考文件存放具体数字，每个数字都标注来源和置信度（一手、二手或未核实）：DfAM 规则、
   配合与热熔螺母、结构、连接器、线缆走线、外壳接缝、验证、来源，以及一个匿名案例。
 - 四个 Python 检查脚本，助手或你自己都可以对导出的网格和 G-code 运行。
+- 第二个 skill [`fdm-part-review`](skills/fdm-part-review/SKILL.md)，用于验收已有零件（导出的网格、
+  切好的盘、渲染图、委派出去的 CAD 工作）：先跑带负向样例的机器检查，再分三条审查线，最后给出
+  结论，每个声明都按实际核实到的级别重述。
+- 四个专职子智能体（仅插件安装提供）：可打印性、结构、集成三位审查者，以及一个验证执行者。
 
 skill 强制的约定：角度一律**从竖直方向**量（切片器的支撑阈值是从水平方向量的，skill 会换算）；
 间隙一律写**每边**；每个尺寸标注 measured / datasheet / reference / placeholder；每个结论标注
@@ -73,6 +78,20 @@ python skills/fdm-design/scripts/interference_check.py shell.stl board.stl plug.
 测试集让每个检查都跑一遍必须失败的样例：悬臂台阶、59° 斜坡、没有牺牲层的沉头孔环、悬空孤岛、
 关闭支撑的 G-code、相互重叠的方块、开口网格。
 
+## 专职智能体
+
+位于 [`agents/`](agents/)，两个 skill 都会用到。
+
+| 智能体 | 负责范围 | 返回内容 | 工具 |
+|---|---|---|---|
+| `fdm-printability-reviewer` | 打印方向、悬垂、桥接、壁厚、边缘、孔、配合 | 问题表、桥接清单、所运行几何检查的原始输出 | Read, Grep, Glob, Bash |
+| `fdm-structural-engineer` | 承力路径、失效后果、紧固件、受载材料 | 每条承力路径的失效后果表、问题表 | Read, Grep, Glob |
+| `fdm-integration-engineer` | 连接器开孔、走线通道、装配顺序、外壳接缝 | 问题表、连接器与线缆表 | Read, Grep, Glob |
+| `fdm-verification-runner` | 运行四个检查，先跑负向样例 | 每次运行的原始输出和退出码、可支撑的结论级别 | Bash, Read, Grep, Glob |
+
+审查线返回的每条问题都附带引用的参考文件和置信度，且从不修改文件；验证执行者只返回原始输出，
+不做判断。智能体只能通过插件方式安装；手动复制 skill 时，改为每条审查线各做一遍独立审查。
+
 ## 安装
 
 ### 作为插件安装
@@ -92,9 +111,11 @@ python skills/fdm-design/scripts/interference_check.py shell.stl board.stl plug.
 ```bash
 git clone https://github.com/baizhiyuan/fdm-design-skill.git
 mkdir -p ~/.claude/skills
-cp -r fdm-design-skill/skills/fdm-design ~/.claude/skills/
+cp -r fdm-design-skill/skills/fdm-design fdm-design-skill/skills/fdm-part-review ~/.claude/skills/
 python3 -m pip install numpy            # 可选：trimesh manifold3d
 ```
+
+两个目录都要复制：`fdm-part-review` 通过相对路径 `../fdm-design/` 读取参考文件和脚本。这种方式不会安装子智能体。
 
 请求涉及 FDM 打印零件时，skill 会自动加载。查看安装情况：`ls ~/.claude/skills/fdm-design`，
 或在 Claude Code 中运行 `/plugin`。

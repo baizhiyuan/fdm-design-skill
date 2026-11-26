@@ -1,7 +1,7 @@
 {
   "name": "fdm-design",
-  "description": "Installs the fdm-design skill: CAD-agnostic design rules for FDM/FFF printed parts and electronics enclosures (orientation, overhangs and bridges, walls, fits, heat-set inserts, load paths, connector openings from plug envelopes, cable corridors, shell joints), hard rules against six recurring failure modes, and four Python checks (geometric overhang audit, forced-support slice check, mesh check, interference check), each tested against fixtures that must fail.",
-  "version": "0.1.2",
+  "description": "Installs two skills and four specialist subagents for FDM/FFF printed parts and electronics enclosures. fdm-design: CAD-agnostic design rules (orientation, overhangs and bridges, walls, fits, heat-set inserts, load paths, connector openings from plug envelopes, cable corridors, shell joints), hard rules against six recurring failure modes, and four Python checks (geometric overhang audit, forced-support slice check, mesh check, interference check), each tested against fixtures that must fail. fdm-part-review: an acceptance pipeline for existing parts and delegated CAD work (machine checks with negative fixtures, three parallel review lanes, a verdict with verified claim levels). Subagents: printability reviewer, structural engineer, integration engineer and a verification runner that reports raw output.",
+  "version": "0.2.0",
   "author": {
     "name": "baizhiyuan"
   },

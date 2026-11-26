@@ -68,6 +68,21 @@ Never present a number from memory as a fact: cite the reference, measure, or ma
   raw check output. An executor's "all checks pass" is a claim to verify, not evidence.
 - Report what was checked as well as what was found, including checks that were skipped.
 
+## Specialist lanes
+
+When installed as the plugin, four subagents ship with this skill. Hand each its lane with
+the brief, the artefacts and the conventions above.
+
+| Agent | Lane | Workflow steps |
+|---|---|---|
+| `fdm-printability-reviewer` | orientation, overhangs, walls, fits | 3, 6, 7 |
+| `fdm-structural-engineer` | load paths, fasteners, materials | 4 |
+| `fdm-integration-engineer` | connectors, cables, assembly, joints | 2, 5, 8 |
+| `fdm-verification-runner` | runs checks, negative fixtures first, raw output | 9 |
+
+The lane that authored geometry never approves it; acceptance stays with the director. To
+review a part that already exists (third-party or delegated), use the `fdm-part-review` skill.
+
 ## Workflow
 
 1. **Brief.** Collect printer, nozzle, material, slicer profile; photos and drawings of every

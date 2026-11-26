@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Repository consistency checks (run locally or in CI).
 
-Checks: the shipped file set, SKILL.md frontmatter and line budget, files that SKILL.md
-names under references/ and scripts/ exist, relative links in Markdown resolve, balanced code
-fences, valid JSON manifests, version agreement between plugin.json, marketplace.json and the
-CHANGELOG, the install line and heading structure of both READMEs, and no absolute local paths
+Checks: the shipped file set, each skill's SKILL.md frontmatter and line budget, files that a
+SKILL.md names under references/ and scripts/ (also via ../<skill>/) exist, each agent's
+frontmatter and the ${CLAUDE_PLUGIN_ROOT}/ paths it names, relative links in Markdown resolve,
+balanced code fences, valid JSON manifests, version agreement between plugin.json,
+marketplace.json and the CHANGELOG, the install line and heading structure of both READMEs, and no absolute local paths
 (home directories, WSL mounts, Windows drive paths) anywhere in the repository.
 
 Usage: python3 scripts/validate.py   (exit 1 on any failure)
@@ -21,9 +22,14 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = "skills/fdm-design"
 SKILL = f"{SKILL_DIR}/SKILL.md"
+SKILL_DIRS = (SKILL_DIR, "skills/fdm-part-review")
 SKILL_MAX_LINES = 200
+AGENTS = tuple(f"agents/{n}.md" for n in (
+    "fdm-structural-engineer", "fdm-printability-reviewer", "fdm-integration-engineer",
+    "fdm-verification-runner"))
 SHIPPED = {
-    SKILL,
+    *(f"{d}/SKILL.md" for d in SKILL_DIRS),
+    *AGENTS,
     *(f"{SKILL_DIR}/references/{n}.md" for n in (
         "dfam-rules", "fits-and-inserts", "structure", "connectors", "cable-routing",
         "shell-joints", "verification", "sources", "case-study")),
@@ -59,7 +65,8 @@ def repo_files(root: Path = ROOT):
 
 
 def check_file_set() -> None:
-    present = {str(p.relative_to(ROOT)) for p in (ROOT / "skills").rglob("*")
+    present = {str(p.relative_to(ROOT)) for tree in ("skills", "agents")
+               for p in (ROOT / tree).rglob("*")
                if p.is_file() and "__pycache__" not in p.parts}
     for rel in sorted(SHIPPED - present):
         fail(f"{rel}: missing")
@@ -67,27 +74,51 @@ def check_file_set() -> None:
         fail(f"{rel}: not in the shipped file set (update SHIPPED in scripts/validate.py if intended)")
 
 
-def check_skill() -> None:
-    text = read(SKILL)
-    lines = text.count("\n") + 1
-    if lines >= SKILL_MAX_LINES:
-        fail(f"{SKILL}: {lines} lines, must stay under {SKILL_MAX_LINES}")
+def frontmatter(rel: str, text: str) -> dict | None:
     parts = text.split("---", 2)
     if not text.startswith("---") or len(parts) < 3:
-        fail(f"{SKILL}: no YAML frontmatter")
-        return
+        fail(f"{rel}: no YAML frontmatter")
+        return None
     try:
         meta = yaml.safe_load(parts[1])
     except yaml.YAMLError as exc:
-        fail(f"{SKILL}: frontmatter does not parse ({exc})")
-        return
+        fail(f"{rel}: frontmatter does not parse ({exc})")
+        return None
     if not isinstance(meta, dict) or not meta.get("description"):
-        fail(f"{SKILL}: frontmatter needs a description")
-    elif meta.get("name") != Path(SKILL_DIR).name:
-        fail(f"{SKILL}: frontmatter name {meta.get('name')!r} != directory {Path(SKILL_DIR).name!r}")
-    for ref in sorted(set(re.findall(r"(?:references|scripts)/[\w.-]+\.(?:md|py)", text))):
-        if not (ROOT / SKILL_DIR / ref).exists():
-            fail(f"{SKILL}: names {ref}, which does not exist")
+        fail(f"{rel}: frontmatter needs a description")
+        return None
+    return meta
+
+
+def check_skill() -> None:
+    for skill_dir in SKILL_DIRS:
+        rel = f"{skill_dir}/SKILL.md"
+        text = read(rel)
+        lines = text.count("\n") + 1
+        if lines >= SKILL_MAX_LINES:
+            fail(f"{rel}: {lines} lines, must stay under {SKILL_MAX_LINES}")
+        meta = frontmatter(rel, text)
+        if meta is None:
+            continue
+        if meta.get("name") != Path(skill_dir).name:
+            fail(f"{rel}: frontmatter name {meta.get('name')!r} != directory {Path(skill_dir).name!r}")
+        named = r"(?:\.\./[\w-]+/)?(?:references|scripts)/[\w.-]+\.(?:md|py)"
+        for ref in sorted(set(re.findall(named, text))):
+            if not (ROOT / skill_dir / ref).exists():
+                fail(f"{rel}: names {ref}, which does not exist")
+
+
+def check_agents() -> None:
+    for path in sorted((ROOT / "agents").glob("*.md")):
+        rel = str(path.relative_to(ROOT))
+        text = path.read_text(encoding="utf-8")
+        meta = frontmatter(rel, text)
+        if meta is not None and meta.get("name") != path.stem:
+            fail(f"{rel}: frontmatter name {meta.get('name')!r} != filename {path.stem!r}")
+        for target in sorted(set(re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}/([\w./-]+)", text))):
+            target = target.rstrip(".")
+            if not (ROOT / target).exists():
+                fail(f"{rel}: names ${{CLAUDE_PLUGIN_ROOT}}/{target}, which does not exist")
 
 
 def strip_code(text: str) -> str:
@@ -182,8 +213,8 @@ def check_local_paths() -> None:
 
 
 def main() -> int:
-    for check in (check_file_set, check_skill, check_markdown, check_json, check_versions,
-                  check_readme_pair, check_local_paths):
+    for check in (check_file_set, check_skill, check_agents, check_markdown, check_json,
+                  check_versions, check_readme_pair, check_local_paths):
         check()
     if errors:
         print("\n".join(f"FAIL {e}" for e in errors))

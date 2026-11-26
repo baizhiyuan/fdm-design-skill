@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757?style=for-the-badge&labelColor=F0EEE6" alt="Claude Code plugin">
-  <img src="https://img.shields.io/badge/version-0.1.2-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="version 0.1.2">
+  <img src="https://img.shields.io/badge/version-0.2.0-C15F3C?style=for-the-badge&labelColor=F0EEE6" alt="version 0.2.0">
   <img src="https://img.shields.io/badge/status-pre--release-B8860B?style=for-the-badge&labelColor=F0EEE6" alt="status: pre-release">
   <img src="https://img.shields.io/badge/license-MIT-788C5D?style=for-the-badge&labelColor=F0EEE6" alt="MIT license">
 </p>
@@ -11,6 +11,7 @@
   <a href="#what-it-does">What it does</a> ·
   <a href="#the-six-hard-rules">Hard rules</a> ·
   <a href="#the-checks">Checks</a> ·
+  <a href="#the-agents">Agents</a> ·
   <a href="#install">Install</a> ·
   <a href="#limits">Limits</a> ·
   <a href="README.zh.md">中文</a>
@@ -32,6 +33,12 @@ nozzle and material as parameters.
   (primary, secondary or unverified): DfAM rules, fits and heat-set inserts, structure,
   connectors, cable routing, shell joints, verification, sources and an anonymised case study.
 - Four Python checks that the assistant (or you) can run on exported meshes and G-code.
+- A second skill, [`fdm-part-review`](skills/fdm-part-review/SKILL.md), for accepting parts
+  that already exist (exported meshes, sliced plates, renders, delegated CAD work): machine
+  checks with negative fixtures first, three review lanes, a verdict that restates every
+  claim at its verified level.
+- Four specialist subagents (plugin install only): printability, structural and integration
+  reviewers, and a verification runner.
 
 Conventions the skill enforces: angles are measured **from vertical** (slicers measure their
 support threshold from horizontal, and the skill converts); clearances are **per side**; every
@@ -78,6 +85,21 @@ The test suite runs every check against fixtures that must fail: a cantilever le
 ramp, a counterbore ring without a sacrificial layer, a floating island, a supports-off
 G-code, overlapping boxes, an open mesh.
 
+## The agents
+
+Shipped in [`agents/`](agents/) and used by both skills.
+
+| Agent | Lane | Returns | Tools |
+|---|---|---|---|
+| `fdm-printability-reviewer` | Orientation, overhangs, bridges, walls, edges, holes, fits | Findings table, bridge list, raw output of the geometric checks it ran | Read, Grep, Glob, Bash |
+| `fdm-structural-engineer` | Load paths, failure consequence, fasteners, materials under load | Failure-consequence table per load path, findings table | Read, Grep, Glob |
+| `fdm-integration-engineer` | Connector openings, cable corridors, assembly order, shell joints | Findings table, connector and cable table | Read, Grep, Glob |
+| `fdm-verification-runner` | Runs the four checks, negative fixture first | Raw stdout and exit code per run, claim levels supported | Bash, Read, Grep, Glob |
+
+The review lanes return findings with a cited reference and confidence and never edit files;
+the runner returns raw output, not judgements. Agents install through the plugin route only;
+a copied skill falls back to separate passes per lane.
+
 ## Install
 
 ### As a plugin
@@ -97,9 +119,12 @@ Enter these slash commands one at a time:
 ```bash
 git clone https://github.com/baizhiyuan/fdm-design-skill.git
 mkdir -p ~/.claude/skills
-cp -r fdm-design-skill/skills/fdm-design ~/.claude/skills/
+cp -r fdm-design-skill/skills/fdm-design fdm-design-skill/skills/fdm-part-review ~/.claude/skills/
 python3 -m pip install numpy            # optional: trimesh manifold3d
 ```
+
+Copy both directories: `fdm-part-review` reads its references and scripts through relative
+`../fdm-design/` paths. The subagents are not installed this way.
 
 The skill loads when a request is about FDM-printed parts. To check what is installed:
 `ls ~/.claude/skills/fdm-design` or `/plugin` in Claude Code.
